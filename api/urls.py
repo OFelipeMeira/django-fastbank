@@ -12,7 +12,4 @@ from .views import (
 router = SimpleRouter()
 router.register('users', UserViewSet)
 
-# urlspatterns = [
-#     path('users/',router.urls, name="users" ),
-# ]
 urlspatterns = router.urls
