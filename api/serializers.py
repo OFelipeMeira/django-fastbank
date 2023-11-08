@@ -1,14 +1,75 @@
 # file to verify and convert models into json format
+import random
 
-# import serializers
 from rest_framework import serializers
 
-# import models
-from .models import User
+from .models import (
+    User,
+    Address,
+    Account,
+    Card,
+    Transactions
+)
 
-# creating a serializer:
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
-        model = User # define the base model
-        fields = '__all__'              # get all fields from this model
-        # fields = ['id', 'field1']     # can select just some of the models
+        model = User
+        fields = (
+            'id',
+            'name',
+            'cpf',
+            'photo'
+        )
+
+class AddressSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Address
+        fields = (
+            'id',
+            'user',
+            'address',
+            'city',
+            'state',
+            'country',
+            'complement',
+            'cep'
+        )
+
+class AccountSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Account
+        fields = (
+            'id',
+            'user',
+            'password',
+            'account_number',
+            'created_at',
+        )
+        extra_kwargs = {
+            'account_number':{
+                'read_only':True
+            }
+        }
+        
+class CardSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Card
+        fields = (
+            'id',
+            'account',
+            'number',
+            'cvv',
+            'created_at',
+            'expiration_date',
+        )
+
+class TransactionsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Transactions
+        fields = (
+            'id',
+            'sender',
+            'receiver',
+            'value',
+            'description',
+        )
