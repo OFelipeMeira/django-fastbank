@@ -1,37 +1,42 @@
-#
-pip install django djangorestframework
+# Installing django and Django-Rest-Framework
+**pip install django djangorestframework**
 
-#
-django-admin startproject easybank .
+# Create a project
+**django-admin startproject easybank .**
 
-#
-django-admin startapp api
+# Create the first App
+**django-admin startapp api**
 
-## add into settings.py -- installed_apps
-'rest_framework',
-'api', // app name
+# Add into settings.py
+```
+installed_apps  = [
+    'rest_framework',
+    'api', // app name
+]
+```
 
-# setup database
-create tables
+# Setup database
+**create tables**
 
-# create superuser
+# Create superuser
+```
 py manage.py createsuperuser
-// user: admin
-// password: admin
-// email: a@b.com
+>> user: admin
+>> password: admin
+>> email: a@b.com
+```
 
-# runserver
-py manage.py runserver
+# Runserver
+**py manage.py runserver**
 
-# create serializers
-create file
+# Create serializers
+**create file**
 
-# create views
-using generics
+# Create views
+**using generics**
 
+# Create url from the app - api endpoints
+**new file: urls.py**
 
-# create url from the app - api endpoints
-new file: urls.py
-
-# insert that new urls.py(from the app) into the urls.py file from the project
-include path(endpoints) into the project urls.py file
+# Insert that new urls.py(from the app) into the urls.py file from the project
+**include path(endpoints) into the project urls.py file**
