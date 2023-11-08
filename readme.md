@@ -28,3 +28,10 @@ create file
 
 # create views
 using generics
+
+
+# create url from the app - api endpoints
+new file: urls.py
+
+# insert that new urls.py(from the app) into the urls.py file from the project
+include path(endpoints) into the project urls.py file
