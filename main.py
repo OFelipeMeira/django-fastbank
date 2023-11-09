@@ -8,7 +8,7 @@ def test_api():
     # print(r["id"])
     print(r)
 
-if __name__ == "__main__":
+def test_account_number():
     import random
     a = ""
     for i in range(4):
@@ -16,3 +16,7 @@ if __name__ == "__main__":
         a += "."
 
     print(a)
+    
+if __name__ == "__main__":
+    a = 10000
+    print(str(a).zfill(4))
