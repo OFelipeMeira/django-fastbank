@@ -22,7 +22,6 @@ class Address(models.Model):
     address    = models.CharField(max_length=255, verbose_name="Address")               # {street name}, {number}  -> number splited by a comma
     city       = models.CharField(max_length=255, verbose_name="City")                  # {city name}
     state      = models.CharField(max_length=255, verbose_name="State")                 # {state}
-    country    = models.CharField(max_length=255, verbose_name="Contry")                # {country}
     complement = models.CharField(max_length=255, null=True, verbose_name="Complement") # {complement}
     cep        = models.CharField(max_length=  8, verbose_name="CEP")                   # {00000000} -> 'postal code' without slashes and dots
     
