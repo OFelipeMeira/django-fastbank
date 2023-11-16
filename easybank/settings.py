@@ -40,6 +40,9 @@ INSTALLED_APPS = [
 
     'rest_framework',
 
+    'rest_framework_swagger',       # Swagger 
+    'drf_yasg',                     # Yet Another Swagger generator
+
     'api',
 ]
 
