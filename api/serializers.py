@@ -20,11 +20,6 @@ class UserSerializer(serializers.ModelSerializer):
             'cpf',
             'photo'
         )
-        extra_kwargs ={
-            'id':{
-                'read_only': True
-            }
-        }
         
 
 class AddressSerializer(serializers.ModelSerializer):
@@ -39,11 +34,6 @@ class AddressSerializer(serializers.ModelSerializer):
             'complement',
             'cep'
         )
-        extra_kwargs = {
-            'id':{
-                'read_only':True
-            }
-        }
 
 class AccountSerializer(serializers.ModelSerializer):
     class Meta:
@@ -55,17 +45,6 @@ class AccountSerializer(serializers.ModelSerializer):
             'account_number',
             'created_at',
         )
-        extra_kwargs = {
-            'id':{
-                'read_only':True
-            },
-            'account_number':{
-                'read_only':True
-            },
-            'created_at':{
-                'read_only':True
-            }
-        }
         
 class CardSerializer(serializers.ModelSerializer):
     class Meta:
@@ -78,23 +57,6 @@ class CardSerializer(serializers.ModelSerializer):
             'created_at',
             'expiration_date',
         )
-        extra_kwargs = {
-            'id':{
-                'read_only':True
-            },
-            'account':{
-                'read_only':True
-            },
-            'number':{
-                'read_only':True
-            },
-            'cvv':{
-                'read_only':True
-            },
-            'created_at':{
-                'read_only':True
-            },
-        }
 
 class TransactionsSerializer(serializers.ModelSerializer):
     class Meta:

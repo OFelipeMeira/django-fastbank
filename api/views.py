@@ -15,6 +15,8 @@ from .serializers import (
     TransactionsSerializer
     )
 
+from rest_framework.decorators import action
+
 
 class UserViewSet(
     mixins.ListModelMixin,      # - Get all registers
@@ -28,6 +30,9 @@ class UserViewSet(
     serializer_class = UserSerializer
 
 
+    # def get_queryset(self):
+    #     return User.objects.get(cpf='12345678911')
+
 class AddressViewSet(
     mixins.ListModelMixin,
     mixins.RetrieveModelMixin,
@@ -39,6 +44,10 @@ class AddressViewSet(
     queryset = Address.objects.all()
     serializer_class = AddressSerializer
 
+    # @action(detail=True, methods=['GET'], url_path='search/(?P<cpf>)')
+    # def custom_get(self, request, pk=None, cpf=None):
+    #     user = User.objects.get(cpf=cpf)
+    #     serializer = serializer.UserSerializer(user)
 
 class AccountViewSet(
     mixins.ListModelMixin,
