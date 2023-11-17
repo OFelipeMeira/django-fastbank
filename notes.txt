@@ -1,0 +1,14 @@
+DB in sqlite3 : no user, no password
+
+admin = {
+    email: a@b.com
+    password: admin
+}
+
+user1 = {
+    first_name: Felipe
+    last_name: Meira
+    cpf: 123456
+    email: b@c.com
+    password: senai@mange
+}
