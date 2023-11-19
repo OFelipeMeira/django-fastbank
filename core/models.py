@@ -57,3 +57,5 @@ class Conta(models.Model):
     agencia = models.CharField(max_length=4)
     numero = models.CharField(max_length=16)
     user = models.ForeignKey( settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
+    saldo = models.DecimalField(max_digits=10, decimal_places=2, null=True)
+    created_at = models.DateTimeField(default=timezone.now)
