@@ -50,7 +50,7 @@ class AccountViewSet(viewsets.ModelViewSet):
     @action(methods=['POST'], detail=True, url_path='sacar')
     def sacar(self, request, pk=None):
         conta = Conta.objects.get(id=pk)
-        serializer_recebido = serializers.SaqueSerialzier(request=request.data)
+        serializer_recebido = serializers.SaqueSerialzier(data=request.data)
 
         if serializer_recebido.is_valid():
             valor_saque = decimal.Decimal(serializer_recebido.validated_data.get('value'))
@@ -74,7 +74,7 @@ class AccountViewSet(viewsets.ModelViewSet):
     @action(methods=['POST'], detail=True, url_path='depositar')
     def depositar(self, request, pk=None):
         conta = Conta.objects.get(id=pk)
-        serializer_recebido = serializers.DepositoSerialzier(request=request.data)
+        serializer_recebido = serializers.DepositoSerialzier(data=request.data)
         
         if serializer_recebido.is_valid():
             # saldo = decimal.Decimal(conta.saldo)
