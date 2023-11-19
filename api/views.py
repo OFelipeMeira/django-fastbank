@@ -4,7 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt import authentication as authenticationJWT
 from core.models import Conta
 from api import serializers
-import random
+import random, decimal
 
 
 class AccountViewSet(viewsets.ModelViewSet):
@@ -23,9 +23,9 @@ class AccountViewSet(viewsets.ModelViewSet):
         return serializers.AccountSerialzer
     
     def create(self, request, *args, **kwargs):
-        serializers = self.serializer_class(data= request.data)
+        serializer = serializers.AccountDetailSerializer(data=request.data)
         
-        if serializers.is_valid():
+        if serializer.is_valid():
             numero_conta = ""
 
             for i in range(16):
@@ -34,7 +34,11 @@ class AccountViewSet(viewsets.ModelViewSet):
             conta = Conta(
                 user= self.request.user,
                 numero= numero_conta,
-                agentcia= "0001"
+                agencia= "0001"
             )
+
+            conta.saldo = decimal.Decimal(0)
+
+            conta.save()
 
             return Response({'message': 'Created'}, status=status.HTTP_201_CREATED)

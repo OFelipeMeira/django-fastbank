@@ -5,7 +5,8 @@ class AccountSerialzer(serializers.ModelSerializer):
     class Meta:
         model = Conta
         fields = ['agencia', 'numero']
-        read_only_fields = ['agencia', 'numero']
+        # read_only_fields = ['agencia', 'numero']
+        read_only_fields = ['numero']
 
 class AccountDetailSerializer(AccountSerialzer):
     class Meta(AccountSerialzer.Meta):
