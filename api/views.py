@@ -11,7 +11,6 @@ from api import serializers
 import random, decimal
 
 
-
 class AccountViewSet(viewsets.ModelViewSet):
     queryset = Conta.objects.all()
     authentication_classes = [authenticationJWT.JWTAuthentication]
@@ -48,10 +47,9 @@ class AccountViewSet(viewsets.ModelViewSet):
 
             return Response({'message': 'Created'}, status=status.HTTP_201_CREATED)
 
-    @action(methods=['POST'], detail=True, pk=None)
+    @action(methods=['POST'], detail=True, url_path='sacar')
     def sacar(self, request, pk=None):
         conta = Conta.objects.get(id=pk)
-
         serializer_recebido = serializers.SaqueSerialzier(request=request.data)
 
         if serializer_recebido.is_valid():
@@ -71,4 +69,21 @@ class AccountViewSet(viewsets.ModelViewSet):
             
             return Response({'message': 'Saldo insuficiente'}, status=status.HTTP_403_FORBIDDEN)
         
+        return Response(serializer_recebido.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    @action(methods=['POST'], detail=True, url_path='depositar')
+    def depositar(self, request, pk=None):
+        conta = Conta.objects.get(id=pk)
+        serializer_recebido = serializers.DepositoSerialzier(request=request.data)
+        
+        if serializer_recebido.is_valid():
+            # saldo = decimal.Decimal(conta.saldo)
+            valor_depositado = decimal.Decimal(serializer_recebido.validated_data.get('value'))
+
+            # conta.saldo = saldo + valor_depositado
+            conta.saldo += valor_depositado
+            conta.save()
+
+            return Response({'saldo':conta.saldo}, status=status.HTTP_200_OK)
+
         return Response(serializer_recebido.errors, status=status.HTTP_400_BAD_REQUEST)
