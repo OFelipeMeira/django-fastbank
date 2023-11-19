@@ -122,7 +122,11 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = 'static/'
+
 STATIC_URL = 'static/static/'
+MEDIA_URL = 'static/media/'
+
+MEDIA_ROOT = 'vol/web/media/'
 MEDIA_ROOT = 'vol/web/static/'
 
 
@@ -145,8 +149,8 @@ REST_FRAMEWORK = {
     ),
 
     'DEFAULT_AUTHENTICATION_CLASSES':(
-        'rest_framework.authentication.SessionAuthentication',
-        'rest_framework.authentication.BasicAuthentication',
+        # 'rest_framework.authentication.SessionAuthentication',
+        # 'rest_framework.authentication.BasicAuthentication',
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     )
 }

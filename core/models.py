@@ -1,4 +1,7 @@
 
+import os
+import uuid
+from django.conf import settings
 
 from django.db import models
 from django.utils import timezone
@@ -7,6 +10,11 @@ from django.contrib.auth.models import(
     BaseUserManager,
     PermissionsMixin
 )
+
+def user_image_field(instance, filename):
+    ext = os.path.splitext(filename)[1]
+    filename = f"{uuid.uuid4()}{ext}"
+    return os.path.join('uploads', 'user', filename)
 
 
 class UserManager(BaseUserManager):
