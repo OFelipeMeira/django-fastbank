@@ -1,10 +1,15 @@
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import action
+
 from rest_framework_simplejwt import authentication as authenticationJWT
+
 from core.models import Conta
 from api import serializers
+
 import random, decimal
+
 
 
 class AccountViewSet(viewsets.ModelViewSet):
@@ -42,3 +47,28 @@ class AccountViewSet(viewsets.ModelViewSet):
             conta.save()
 
             return Response({'message': 'Created'}, status=status.HTTP_201_CREATED)
+
+    @action(methods=['POST'], detail=True, pk=None)
+    def sacar(self, request, pk=None):
+        conta = Conta.objects.get(id=pk)
+
+        serializer_recebido = serializers.SaqueSerialzier(request=request.data)
+
+        if serializer_recebido.is_valid():
+            valor_saque = decimal.Decimal(serializer_recebido.validated_data.get('value'))
+            saldo = decimal.Decimal(conta.saldo)
+
+            comparar = saldo.compare(valor_saque)
+
+            if comparar == 0 or comparar == 1 :
+                novo_valor = 0 if saldo - valor_saque <= 0 else saldo - valor_saque
+
+                conta.saldo = novo_valor
+
+                conta.save()
+
+                return Response({"saldo": conta.saldo}, status=status.HTTP_200_OK)
+            
+            return Response({'message': 'Saldo insuficiente'}, status=status.HTTP_403_FORBIDDEN)
+        
+        return Response(serializer_recebido.errors, status=status.HTTP_400_BAD_REQUEST)
