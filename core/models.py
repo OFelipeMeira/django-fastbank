@@ -52,3 +52,8 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self) -> str:
         return f"{self.first_name} {self.last_name}"
+    
+class Conta(models.Model):
+    agencia = models.CharField(max_length=4)
+    numero = models.CharField(max_length=16)
+    user = models.ForeignKey( settings.AUTH_USER_MODEL, on_delete=models.PROTECT)

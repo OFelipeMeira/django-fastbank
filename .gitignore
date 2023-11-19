@@ -7,3 +7,7 @@
 .sqlite3
 .sqlite
 db.sqlite3
+
+*/.png
+*/.jpg
+*/.svg
