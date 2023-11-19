@@ -59,3 +59,7 @@ class Conta(models.Model):
     user = models.ForeignKey( settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
     saldo = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     created_at = models.DateTimeField(default=timezone.now)
+
+    
+    def __str__(self) -> str:
+        return f"{self.agencia} {self.numero}"
