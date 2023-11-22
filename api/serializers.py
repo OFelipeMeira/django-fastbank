@@ -28,3 +28,10 @@ class SaqueSerialzier(serializers.Serializer):
 
     class Meta:
         fields = ['value']
+
+class TransferenciaSerializer(serializers.Serializer):
+    account = serializers.CharField()
+    value = serializers.DecimalField(max_digits=8, decimal_places=2)
+
+    class Meta:
+        fields = ['value', "account"]

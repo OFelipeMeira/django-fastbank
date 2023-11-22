@@ -87,3 +87,26 @@ class AccountViewSet(viewsets.ModelViewSet):
             return Response({'saldo':conta.saldo}, status=status.HTTP_200_OK)
 
         return Response(serializer_recebido.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    @action(methods=['POST'], detail=True, url_path='transferencia')
+    def transferencia(self, request, pk=None):
+        sender_account = Conta.objects.get(id=pk)
+        print("_"*30)
+        print(sender_account)
+
+        serializer_recebido = serializers.TransferenciaSerializer(data=request.data)
+        if serializer_recebido.is_valid():
+            print("="*30)
+            print(serializer_recebido.validated_data.get('account'))
+
+            receiver_account = Conta.objects.get(numero=serializer_recebido.validated_data.get('account'))
+            print("+"*30)
+            print(receiver_account)
+
+        # print("="*30)
+        # print(conta.saldo)
+        # print("="*30)
+        # print(serializer_recebido)
+        # print("*"*30)
+
+        return Response()
