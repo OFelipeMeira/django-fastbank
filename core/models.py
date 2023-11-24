@@ -45,6 +45,10 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False)
     created_at = models.DateTimeField(default=timezone.now)
 
+    login_attempts = models.PositiveIntegerField(default=0)
+    locked_at = models.DateTimeField(null=True, blank=True)
+    unlocked_at = models.DateTimeField(null=True, blank=True)
+
     objects = UserManager()
 
     USERNAME_FIELD = 'email'
@@ -75,3 +79,4 @@ class Loan(models.Model):
     installments = models.IntegerField()
     request_date = models.DateTimeField(default=timezone.now)
     fees = models.DecimalField(max_digits=5,decimal_places=3)
+    status = models.CharField(max_length=255)
