@@ -5,7 +5,7 @@ from rest_framework.decorators import action
 
 from rest_framework_simplejwt import authentication as authenticationJWT
 
-from core.models import Conta
+from core.models import Conta, Transfer
 from api import serializers
 
 import random, decimal
@@ -18,7 +18,6 @@ class AccountViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        # return self.queryset.filter(user=self.request.user).order_by('-created_at').distinct()
         return self.queryset.filter(user=self.request.user).order_by('-created_at')
     
     def get_serializer_class(self):
@@ -38,7 +37,7 @@ class AccountViewSet(viewsets.ModelViewSet):
             conta = Conta(
                 user= self.request.user,
                 numero= numero_conta,
-                agencia= "0001"
+                agencia= "0001",
             )
 
             conta.saldo = decimal.Decimal(0)
@@ -88,25 +87,48 @@ class AccountViewSet(viewsets.ModelViewSet):
 
         return Response(serializer_recebido.errors, status=status.HTTP_400_BAD_REQUEST)
     
-    @action(methods=['POST'], detail=True, url_path='transferencia')
-    def transferencia(self, request, pk=None):
-        sender_account = Conta.objects.get(id=pk)
-        print("_"*30)
-        print(sender_account)
 
-        serializer_recebido = serializers.TransferenciaSerializer(data=request.data)
-        if serializer_recebido.is_valid():
-            print("="*30)
-            print(serializer_recebido.validated_data.get('account'))
+class TansferViewSet(viewsets.GenericViewSet):
+    queryset = Transfer.objects.all()
+    serializer_class = serializers.TransferenciaSerializer
 
-            receiver_account = Conta.objects.get(numero=serializer_recebido.validated_data.get('account'))
-            print("+"*30)
-            print(receiver_account)
+    def get_user(self):
+        return self.request.user
+    
+    def verify_account_balance(self, account_id, value):
+        account = Conta.objects.get(id=account_id)
 
-        # print("="*30)
-        # print(conta.saldo)
-        # print("="*30)
-        # print(serializer_recebido)
-        # print("*"*30)
+        if value <= 0 or account.saldo < value:
+            return False
+        return True
 
-        return Response()
+    def create(self, request):
+        sender = request.data.get("sender")
+        receiver = request.data.get("receiver")
+        value = request.data.get("value")
+        description = request.data.get("description")
+
+        if self.verify_account_balance(sender, value):
+
+            transfer_dict = {
+                "sender": sender,
+                "receiver": receiver,
+                "value": value,
+                "description": description
+                }
+
+            transfer_serializer = serializers.TransferenciaSerializer(data=transfer_dict)
+            transfer_serializer.is_valid(raise_exception=True)
+            # transfer_serializer.save()
+
+            accound_sender = Conta.objects.get(id=sender)
+            accound_sender.saldo -= value
+            accound_sender.save()
+            
+            accound_receiver = Conta.objects.get(id=receiver)
+            accound_receiver.saldo += value
+            accound_receiver.save()
+
+            return Response({'message': 'Transferido'}, status=status.HTTP_200_OK)
+        
+        return Response({'message': 'Erro na transferencia'}, status=status.HTTP_400_BAD_REQUEST)

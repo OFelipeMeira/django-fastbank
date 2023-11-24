@@ -63,3 +63,9 @@ class Conta(models.Model):
     
     def __str__(self) -> str:
         return f"{self.agencia} {self.numero}"
+    
+class Transfer(models.Model):
+    sender = models.ForeignKey(Conta, on_delete=models.PROTECT, related_name="sender")
+    receiver = models.ForeignKey(Conta, on_delete=models.PROTECT, related_name="receiver")
+    value = models.DecimalField(max_digits=10,decimal_places=2)
+    description = models.CharField(max_length=255)

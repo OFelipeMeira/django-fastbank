@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from core.models import Conta
+from core.models import Conta, Transfer
 
 
 class AccountSerialzer(serializers.ModelSerializer):
@@ -29,9 +29,15 @@ class SaqueSerialzier(serializers.Serializer):
     class Meta:
         fields = ['value']
 
-class TransferenciaSerializer(serializers.Serializer):
-    account = serializers.CharField()
+class TransferenciaSerializer(serializers.ModelSerializer):
+    sender = serializers.PrimaryKeyRelatedField(
+        queryset = Conta.objects.all()
+    )
+    receiver = serializers.PrimaryKeyRelatedField(
+        queryset = Conta.objects.all()
+    )
     value = serializers.DecimalField(max_digits=8, decimal_places=2)
 
     class Meta:
-        fields = ['value', "account"]
+        model = Transfer
+        fields = ['value', "sender", "receiver"]
