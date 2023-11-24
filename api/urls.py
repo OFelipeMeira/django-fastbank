@@ -9,5 +9,7 @@ router.register('transfer', views.TansferViewSet)
 app_name = 'api'
 
 urlpatterns = [
-    path('', include(router.urls))
+    path('', include(router.urls)),
+    path('loan/',views.LoanViewSet.as_view())
+
 ]

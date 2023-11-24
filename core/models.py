@@ -1,4 +1,3 @@
-
 import os
 import uuid
 from django.conf import settings
@@ -53,19 +52,26 @@ class User(AbstractBaseUser, PermissionsMixin):
     def __str__(self) -> str:
         return f"{self.first_name} {self.last_name}"
     
-class Conta(models.Model):
-    agencia = models.CharField(max_length=4)
-    numero = models.CharField(max_length=16)
+class Account(models.Model):
+    agency = models.CharField(max_length=4)
+    number = models.CharField(max_length=16)
+    # nickname = models.CharField(max_length=255)
     user = models.ForeignKey( settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
-    saldo = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    balance = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     created_at = models.DateTimeField(default=timezone.now)
 
-    
     def __str__(self) -> str:
-        return f"{self.agencia} {self.numero}"
+        return f"{self.agency} {self.number}"
     
 class Transfer(models.Model):
-    sender = models.ForeignKey(Conta, on_delete=models.PROTECT, related_name="sender")
-    receiver = models.ForeignKey(Conta, on_delete=models.PROTECT, related_name="receiver")
+    sender = models.ForeignKey(Account, on_delete=models.PROTECT, related_name="sender")
+    receiver = models.ForeignKey(Account, on_delete=models.PROTECT, related_name="receiver")
     value = models.DecimalField(max_digits=10,decimal_places=2)
     description = models.CharField(max_length=255)
+
+class Loan(models.Model):
+    account = models.ForeignKey(Account, on_delete=models.PROTECT)
+    value = models.DecimalField(max_digits=10, decimal_places=2)
+    installments = models.IntegerField()
+    request_date = models.DateTimeField(default=timezone.now)
+    fees = models.DecimalField(max_digits=5,decimal_places=3)

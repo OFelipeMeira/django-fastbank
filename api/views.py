@@ -1,20 +1,19 @@
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, generics
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
 
 from rest_framework_simplejwt import authentication as authenticationJWT
 
-from core.models import Conta, Transfer
+from core import models
 from api import serializers
 
 import random, decimal
 
 
 class AccountViewSet(viewsets.ModelViewSet):
-    queryset = Conta.objects.all()
+    queryset = models.Account.objects.all()
     authentication_classes = [authenticationJWT.JWTAuthentication]
-
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
@@ -29,76 +28,67 @@ class AccountViewSet(viewsets.ModelViewSet):
         serializer = serializers.AccountDetailSerializer(data=request.data)
         
         if serializer.is_valid():
-            numero_conta = ""
+            account_number = ""
 
-            for i in range(16):
-                numero_conta += f"{ random.randint(0,9) }"
+            for _ in range(16):
+                account_number += f"{ random.randint(0,9) }"
 
-            conta = Conta(
+            account = models.Account(
                 user= self.request.user,
-                numero= numero_conta,
-                agencia= "0001",
+                number= account_number,
+                agency= "0001",
             )
 
-            conta.saldo = decimal.Decimal(0)
+            account.balance = decimal.Decimal(0)
 
-            conta.save()
+            account.save()
 
-            return Response({'message': 'Created'}, status=status.HTTP_201_CREATED)
+            return Response({'message': 'Account created'}, status=status.HTTP_201_CREATED)
 
     @action(methods=['POST'], detail=True, url_path='sacar')
-    def sacar(self, request, pk=None):
-        conta = Conta.objects.get(id=pk)
-        serializer_recebido = serializers.SaqueSerialzier(data=request.data)
+    def withdraw(self, request, pk=None):
+        account = models.Account.objects.get(id=pk)
+        serializer = serializers.ValueSerialzier(data=request.data)
 
-        if serializer_recebido.is_valid():
-            valor_saque = decimal.Decimal(serializer_recebido.validated_data.get('value'))
-            saldo = decimal.Decimal(conta.saldo)
+        if serializer.is_valid():
+            withdraw_value = decimal.Decimal(serializer.validated_data.get('value'))
+            balance = decimal.Decimal(account.balance)
 
-            comparar = saldo.compare(valor_saque)
+            comparar = balance.compare(withdraw_value)
 
             if comparar == 0 or comparar == 1 :
-                novo_valor = 0 if saldo - valor_saque <= 0 else saldo - valor_saque
+                account.balance = 0 if balance - withdraw_value <= 0 else balance - withdraw_value
+                account.save()
 
-                conta.saldo = novo_valor
-
-                conta.save()
-
-                return Response({"saldo": conta.saldo}, status=status.HTTP_200_OK)
+                return Response({"balance": account.balance}, status=status.HTTP_200_OK)
             
-            return Response({'message': 'Saldo insuficiente'}, status=status.HTTP_403_FORBIDDEN)
+            return Response({'message': 'Insufficient balance'}, status=status.HTTP_401_UNAUTHORIZED)
         
-        return Response(serializer_recebido.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     @action(methods=['POST'], detail=True, url_path='depositar')
-    def depositar(self, request, pk=None):
-        conta = Conta.objects.get(id=pk)
-        serializer_recebido = serializers.DepositoSerialzier(data=request.data)
+    def deposit(self, request, pk=None):
+        account = models.Account.objects.get(id=pk)
+        serializer = serializers.ValueSerialzier(data=request.data)
         
-        if serializer_recebido.is_valid():
-            # saldo = decimal.Decimal(conta.saldo)
-            valor_depositado = decimal.Decimal(serializer_recebido.validated_data.get('value'))
+        if serializer.is_valid():
+            account.balance += decimal.Decimal(serializer.validated_data.get('value'))
+            account.save()
 
-            # conta.saldo = saldo + valor_depositado
-            conta.saldo += valor_depositado
-            conta.save()
+            return Response({'balance':account.balance}, status=status.HTTP_200_OK)
 
-            return Response({'saldo':conta.saldo}, status=status.HTTP_200_OK)
-
-        return Response(serializer_recebido.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 
 class TansferViewSet(viewsets.GenericViewSet):
-    queryset = Transfer.objects.all()
+    queryset = models.Transfer.objects.all()
     serializer_class = serializers.TransferenciaSerializer
 
     def get_user(self):
         return self.request.user
     
     def verify_account_balance(self, account_id, value):
-        account = Conta.objects.get(id=account_id)
-
-        if value <= 0 or account.saldo < value:
+        if value <= 0 or models.Account.objects.get(id=account_id).balance < value:
             return False
         return True
 
@@ -110,25 +100,58 @@ class TansferViewSet(viewsets.GenericViewSet):
 
         if self.verify_account_balance(sender, value):
 
-            transfer_dict = {
-                "sender": sender,
-                "receiver": receiver,
-                "value": value,
-                "description": description
-                }
-
-            transfer_serializer = serializers.TransferenciaSerializer(data=transfer_dict)
+            transfer_serializer = serializers.TransferenciaSerializer(
+                data={
+                    "sender": sender,
+                    "receiver": receiver,
+                    "value": value,
+                    "description": description
+                    }
+                )
             transfer_serializer.is_valid(raise_exception=True)
-            # transfer_serializer.save()
 
-            accound_sender = Conta.objects.get(id=sender)
-            accound_sender.saldo -= value
+            accound_sender = models.Account.objects.get(id=sender)
+            accound_sender.balance -= value
             accound_sender.save()
-            
-            accound_receiver = Conta.objects.get(id=receiver)
-            accound_receiver.saldo += value
+
+            accound_receiver = models.Account.objects.get(id=receiver)
+            accound_receiver.balance += value
             accound_receiver.save()
 
             return Response({'message': 'Transferido'}, status=status.HTTP_200_OK)
         
         return Response({'message': 'Erro na transferencia'}, status=status.HTTP_400_BAD_REQUEST)
+    
+class LoanViewSet(generics.ListCreateAPIView):
+    queryset = models.Loan.objects.all()
+    serializer_class = serializers.LoanSerializer
+    authentication_classes = [authenticationJWT.JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def verify_info(self, value, installmets):
+        if value > 0 or installmets > 0:
+            return True
+        return False
+
+    def create(self, request):
+        value = request.data.get("value")
+        installments = request.data.get("installments")
+        request_date = request.data.get("request_date")
+        account = request.data.get("account")
+        fees = request.data.get("fees")
+
+        if self.verify_info(value, installments):
+            loan_serializer = serializers.LoanSerializer(
+                data={
+                    "value":value,
+                    "installments":installments,
+                    "request_date":request_date,
+                    "account":account,
+                    "fees":fees,
+                }
+            )
+            loan_serializer.is_valid(raise_exception=True)
+            loan_serializer.save()
+
+            return Response({'message': 'Loan Recieved'}, status=status.HTTP_201_CREATED)
+
