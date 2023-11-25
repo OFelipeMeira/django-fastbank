@@ -45,7 +45,7 @@ class AccountViewSet(viewsets.ModelViewSet):
 
             return Response({'message': 'Account created'}, status=status.HTTP_201_CREATED)
 
-    @action(methods=['POST'], detail=True, url_path='sacar')
+    @action(methods=['POST'], detail=True, url_path='withdraw')
     def withdraw(self, request, pk=None):
         account = models.Account.objects.get(id=pk)
         serializer = serializers.ValueSerialzier(data=request.data)
@@ -66,7 +66,7 @@ class AccountViewSet(viewsets.ModelViewSet):
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
-    @action(methods=['POST'], detail=True, url_path='depositar')
+    @action(methods=['POST'], detail=True, url_path='deposit')
     def deposit(self, request, pk=None):
         account = models.Account.objects.get(id=pk)
         serializer = serializers.ValueSerialzier(data=request.data)
@@ -82,7 +82,7 @@ class AccountViewSet(viewsets.ModelViewSet):
 
 class TansferViewSet(viewsets.GenericViewSet):
     queryset = models.Transfer.objects.all()
-    serializer_class = serializers.TransferenciaSerializer
+    serializer_class = serializers.TransferSerializer
 
     def get_user(self):
         return self.request.user
@@ -95,12 +95,34 @@ class TansferViewSet(viewsets.GenericViewSet):
     def create(self, request):
         sender = request.data.get("sender")
         receiver = request.data.get("receiver")
-        value = request.data.get("value")
+        value = round(decimal.Decimal(request.data.get("value")), 2)
         description = request.data.get("description")
+        
+        print("+"*30)
+        print(round(value,2))
+        
+        # try:
 
-        if self.verify_account_balance(sender, value):
+        if value < 0:
+            print("="*30)
+            print("1")
+            print("="*30)
+            # If trys to transfer <=0
+            return Respose({'message': 'Invalid value for transfer'}, status=status.HTTP_403_FORBIDDEN)
+        
+        elif models.Account.objects.get(id=sender).balance < value:
+            print("="*30)
+            print("2")
+            print("="*30)
+            # if there is no balance enough
+            return Response({'message': 'No balance enough'}, status=status.HTTP_403_FORBIDDEN)
+        
+        else:
+            print("="*30)
+            print("3")
+            print("="*30)
 
-            transfer_serializer = serializers.TransferenciaSerializer(
+            transfer_serializer = serializers.TransferSerializer(
                 data={
                     "sender": sender,
                     "receiver": receiver,
@@ -111,27 +133,22 @@ class TansferViewSet(viewsets.GenericViewSet):
             transfer_serializer.is_valid(raise_exception=True)
 
             accound_sender = models.Account.objects.get(id=sender)
-            accound_sender.balance -= value
+            accound_sender.balance -=  value
             accound_sender.save()
 
             accound_receiver = models.Account.objects.get(id=receiver)
             accound_receiver.balance += value
             accound_receiver.save()
 
-            return Response({'message': 'Transferido'}, status=status.HTTP_200_OK)
-        
-        return Response({'message': 'Erro na transferencia'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'message': 'Transfered'}, status=status.HTTP_200_OK)
+        # except Exception as e:
+        #     return Response({'message': 'Unexpected Error', 'error': e}, status=status.HTTP_400_BAD_REQUEST)
     
 class LoanViewSet(generics.ListCreateAPIView):
     queryset = models.Loan.objects.all()
     serializer_class = serializers.LoanSerializer
     authentication_classes = [authenticationJWT.JWTAuthentication]
     permission_classes = [IsAuthenticated]
-
-    def verify_info(self, value, installmets):
-        if value > 0 or installmets > 0:
-            return True
-        return False
 
     def create(self, request):
         value = request.data.get("value")
@@ -140,7 +157,16 @@ class LoanViewSet(generics.ListCreateAPIView):
         account = request.data.get("account")
         fees = request.data.get("fees")
 
-        if self.verify_info(value, installments):
+        min_value = 1000
+        min_installments = 1
+        
+        if value <= min_value:
+            return Response({'message': f'the value to loan needs to be at least {min_value}'})
+        
+        elif installments <= min_installments:
+            return Response({'message': f'the number of installments needs to be at least {min_installments}'})
+        
+        else:
             loan_serializer = serializers.LoanSerializer(
                 data={
                     "value":value,

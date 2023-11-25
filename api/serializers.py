@@ -21,7 +21,7 @@ class ValueSerialzier(serializers.Serializer):
     class Meta:
         fields = ['value']
 
-class TransferenciaSerializer(serializers.ModelSerializer):
+class TransferSerializer(serializers.ModelSerializer):
     sender = serializers.PrimaryKeyRelatedField(
         queryset = Account.objects.all()
     )
