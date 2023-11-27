@@ -1,9 +1,11 @@
-from rest_framework import viewsets, status, generics
+from rest_framework import viewsets, status, generics, mixins
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
 
 from rest_framework_simplejwt import authentication as authenticationJWT
+
+from django.db.models import Q
 
 from core import models
 from api import serializers
@@ -80,7 +82,7 @@ class AccountViewSet(viewsets.ModelViewSet):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 
-class TansferViewSet(viewsets.GenericViewSet):
+class TansferViewSet(viewsets.GenericViewSet, mixins.ListModelMixin):
     queryset = models.Transfer.objects.all()
     serializer_class = serializers.TransferSerializer
 
@@ -92,7 +94,7 @@ class TansferViewSet(viewsets.GenericViewSet):
             return False
         return True
 
-    def create(self, request):
+    def create(self, requests):
         sender = request.data.get("sender")
         receiver = request.data.get("receiver")
         value = round(decimal.Decimal(request.data.get("value")), 2)
@@ -125,6 +127,7 @@ class TansferViewSet(viewsets.GenericViewSet):
                         }
                     )
                 transfer_serializer.is_valid(raise_exception=True)
+                transfer_serializer.save()
 
                 accound_sender = models.Account.objects.get(id=sender)
                 accound_sender.balance -=  value
@@ -138,7 +141,18 @@ class TansferViewSet(viewsets.GenericViewSet):
             
             else:
                 return Response({'message': 'This account is not from the logged user'}, status=status.HTTP_403_FORBIDDEN)
-    
+
+    def list(self, request):
+        queryset = models.Transfer.objects.filter(
+            Q()
+        )
+        serializer = self.get_serializer(queryset, many=True)
+
+        return Response(serializer.data)
+
+        
+        
+
 class LoanViewSet(generics.ListCreateAPIView):
     queryset = models.Loan.objects.all()
     serializer_class = serializers.LoanSerializer
@@ -175,4 +189,3 @@ class LoanViewSet(generics.ListCreateAPIView):
             loan_serializer.save()
 
             return Response({'message': 'Loan Recieved'}, status=status.HTTP_201_CREATED)
-
