@@ -104,45 +104,40 @@ class TansferViewSet(viewsets.GenericViewSet):
         # try:
 
         if value < 0:
-            print("="*30)
-            print("1")
-            print("="*30)
             # If trys to transfer <=0
-            return Respose({'message': 'Invalid value for transfer'}, status=status.HTTP_403_FORBIDDEN)
+            return Response({'message': 'Invalid value for transfer'}, status=status.HTTP_403_FORBIDDEN)
         
         elif models.Account.objects.get(id=sender).balance < value:
-            print("="*30)
-            print("2")
-            print("="*30)
             # if there is no balance enough
             return Response({'message': 'No balance enough'}, status=status.HTTP_403_FORBIDDEN)
         
         else:
-            print("="*30)
-            print("3")
-            print("="*30)
 
-            transfer_serializer = serializers.TransferSerializer(
-                data={
-                    "sender": sender,
-                    "receiver": receiver,
-                    "value": value,
-                    "description": description
-                    }
-                )
-            transfer_serializer.is_valid(raise_exception=True)
+            # Verify if the 'sender' is an id from an Account from the logged user:
+            if models.Account.objects.get(id=sender).user.id == request.user.id:
 
-            accound_sender = models.Account.objects.get(id=sender)
-            accound_sender.balance -=  value
-            accound_sender.save()
+                transfer_serializer = serializers.TransferSerializer(
+                    data={
+                        "sender": sender,
+                        "receiver": receiver,
+                        "value": value,
+                        "description": description
+                        }
+                    )
+                transfer_serializer.is_valid(raise_exception=True)
 
-            accound_receiver = models.Account.objects.get(id=receiver)
-            accound_receiver.balance += value
-            accound_receiver.save()
+                accound_sender = models.Account.objects.get(id=sender)
+                accound_sender.balance -=  value
+                accound_sender.save()
 
-            return Response({'message': 'Transfered'}, status=status.HTTP_200_OK)
-        # except Exception as e:
-        #     return Response({'message': 'Unexpected Error', 'error': e}, status=status.HTTP_400_BAD_REQUEST)
+                accound_receiver = models.Account.objects.get(id=receiver)
+                accound_receiver.balance += value
+                accound_receiver.save()
+
+                return Response({'message': 'Transfered'}, status=status.HTTP_200_OK)
+            
+            else:
+                return Response({'message': 'This account is not from the logged user'}, status=status.HTTP_403_FORBIDDEN)
     
 class LoanViewSet(generics.ListCreateAPIView):
     queryset = models.Loan.objects.all()
