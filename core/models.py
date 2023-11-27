@@ -75,8 +75,18 @@ class Transfer(models.Model):
 
 class Loan(models.Model):
     account = models.ForeignKey(Account, on_delete=models.PROTECT)
-    value = models.DecimalField(max_digits=10, decimal_places=2)
     installments = models.IntegerField()
     request_date = models.DateTimeField(default=timezone.now)
+    payed = models.BooleanField(default=False)
+
+    # original value
+    value = models.DecimalField(max_digits=10, decimal_places=2)
+    # % of fees
     fees = models.DecimalField(max_digits=5,decimal_places=3)
-    status = models.CharField(max_length=255)
+
+class LoanInstallments(models.Model):
+    loanId = models.ForeignKey(Loan, on_delete=models.CASCADE)
+    payed_date = models.DateTimeField(null=True)
+    due_date = models.DateTimeField(null=False)
+    # value with fee added
+    value = models.DecimalField(max_digits=10,decimal_places=2)

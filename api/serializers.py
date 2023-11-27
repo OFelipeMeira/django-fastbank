@@ -23,15 +23,7 @@ class ValueSerialzier(serializers.Serializer):
         fields = ['value']
 
 class TransferSerializer(serializers.ModelSerializer):
-    # sender = serializers.PrimaryKeyRelatedField(
-    #     queryset = Account.objects.all(),
-    #     many=False
-    # )
     sender = AccountSerialzer()
-    # receiver = serializers.PrimaryKeyRelatedField(
-    #     queryset = Account.objects.all(),
-    #     many=False
-    # )
     receiver = AccountSerialzer()
     value = serializers.DecimalField(max_digits=8, decimal_places=2)
 
@@ -42,9 +34,9 @@ class TransferSerializer(serializers.ModelSerializer):
 class LoanSerializer(serializers.ModelSerializer):
     class Meta:
         model = Loan
+        fields = ['account','installments','value']
+
+class LoanInstallmentsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LoanInstallments
         fields = '__all__'
-        extra_kwargs = {
-            "description": {
-                'required':False
-                }
-            }

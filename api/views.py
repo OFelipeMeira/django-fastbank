@@ -82,7 +82,7 @@ class AccountViewSet(viewsets.ModelViewSet):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 
-class TansferViewSet(viewsets.GenericViewSet, mixins.ListModelMixin):
+class TansferViewSet(viewsets.GenericViewSet):
     queryset = models.Transfer.objects.all()
     serializer_class = serializers.TransferSerializer
 
@@ -148,7 +148,6 @@ class TansferViewSet(viewsets.GenericViewSet, mixins.ListModelMixin):
         serializer = self.get_serializer(queryset, many=True)
 
         return Response(serializer.data)
-        # return Response()
         
 
 class LoanViewSet(generics.ListCreateAPIView):
@@ -158,11 +157,9 @@ class LoanViewSet(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated]
 
     def create(self, request):
+        account = request.data.get("account")
         value = request.data.get("value")
         installments = request.data.get("installments")
-        request_date = request.data.get("request_date")
-        account = request.data.get("account")
-        fees = request.data.get("fees")
 
         min_value = 1000
         min_installments = 1
@@ -178,12 +175,20 @@ class LoanViewSet(generics.ListCreateAPIView):
                 data={
                     "value":value,
                     "installments":installments,
-                    "request_date":request_date,
-                    "account":account,
-                    "fees":fees,
+                    "account": account,
+                    "fees":  decimal.Decimal(0.05),
+                    # "request_date":request_date,
+                    # "status": status
                 }
             )
             loan_serializer.is_valid(raise_exception=True)
             loan_serializer.save()
+
+            # for payment in installments:
+            #     # models.LoanInstallments(
+            #     #     value= payment.value,
+            #     # )
+            #     print(payment.value)
+
 
             return Response({'message': 'Loan Recieved'}, status=status.HTTP_201_CREATED)
