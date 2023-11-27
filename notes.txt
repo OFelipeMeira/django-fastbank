@@ -12,3 +12,11 @@ user1 = {
     email: b@c.com
     password: senai@mange
 }
+
+
+A fazer:
+    -solicitar cartão de credito
+    -historico de compras de cartão de credito
+
+    -solicitar emprestimo
+    -historico detalhes emprestimo

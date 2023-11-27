@@ -39,7 +39,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     first_name = models.CharField(max_length=255, null=False)
     last_name = models.CharField(max_length=255, null=False)
     cpf = models.CharField(max_length=255, null=False)
-    url_imagem = models.ImageField(null=True, upload_to=user_image_field)
+    url_image = models.ImageField(null=True, upload_to=user_image_field)
 
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
@@ -71,7 +71,7 @@ class Transfer(models.Model):
     sender = models.ForeignKey(Account, on_delete=models.PROTECT, related_name="sender")
     receiver = models.ForeignKey(Account, on_delete=models.PROTECT, related_name="receiver")
     value = models.DecimalField(max_digits=10,decimal_places=2)
-    description = models.CharField(max_length=255)
+    description = models.CharField(max_length=255, null=True)
 
 class Loan(models.Model):
     account = models.ForeignKey(Account, on_delete=models.PROTECT)

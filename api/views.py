@@ -94,7 +94,7 @@ class TansferViewSet(viewsets.GenericViewSet, mixins.ListModelMixin):
             return False
         return True
 
-    def create(self, requests):
+    def create(self, request):
         sender = request.data.get("sender")
         receiver = request.data.get("receiver")
         value = round(decimal.Decimal(request.data.get("value")), 2)
@@ -103,8 +103,6 @@ class TansferViewSet(viewsets.GenericViewSet, mixins.ListModelMixin):
         print("+"*30)
         print(round(value,2))
         
-        # try:
-
         if value < 0:
             # If trys to transfer <=0
             return Response({'message': 'Invalid value for transfer'}, status=status.HTTP_403_FORBIDDEN)
@@ -142,15 +140,15 @@ class TansferViewSet(viewsets.GenericViewSet, mixins.ListModelMixin):
             else:
                 return Response({'message': 'This account is not from the logged user'}, status=status.HTTP_403_FORBIDDEN)
 
-    def list(self, request):
+    @action(methods=['GET'],detail=True, url_path='statement')
+    def statement(self, request, pk=None):
         queryset = models.Transfer.objects.filter(
-            Q()
+            Q(sender=pk) | Q(receiver=pk)
         )
         serializer = self.get_serializer(queryset, many=True)
 
         return Response(serializer.data)
-
-        
+        # return Response()
         
 
 class LoanViewSet(generics.ListCreateAPIView):
