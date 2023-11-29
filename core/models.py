@@ -82,7 +82,7 @@ class Loan(models.Model):
     # original value
     value = models.DecimalField(max_digits=10, decimal_places=2)
     # % of fees
-    fees = models.DecimalField(max_digits=5,decimal_places=3)
+    fees = models.DecimalField(max_digits=5,decimal_places=3, default=1.025)
 
 class LoanInstallments(models.Model):
     loanId = models.ForeignKey(Loan, on_delete=models.CASCADE)

@@ -10,7 +10,8 @@ from django.db.models import Q
 from core import models
 from api import serializers
 
-import random, decimal
+import random, decimal, datetime
+from dateutil.relativedelta import relativedelta
 
 
 class AccountViewSet(viewsets.ModelViewSet):
@@ -104,13 +105,7 @@ class TansferViewSet(viewsets.GenericViewSet):
         receiver = request.data.get("receiver")
         value = round(decimal.Decimal(request.data.get("value")), 2)
         description = request.data.get("description")
-        
-        print("+"*30)
-        print(round(value,2))
-        print(sender)
-        print(receiver)
-        print(value)
-        print(description)
+
         
         if value < 0:
             # If trys to transfer <=0
@@ -167,8 +162,15 @@ class LoanViewSet(generics.ListCreateAPIView):
 
     def create(self, request):
         account = request.data.get("account")
-        value = request.data.get("value")
+        value = decimal.Decimal(request.data.get("value"))
         installments = request.data.get("installments")
+
+                
+        print("+"*30)
+        print(round(value,2))
+        print(account)
+        print(value)
+        print(installments)
 
         min_value = 1000
         min_installments = 1
@@ -180,12 +182,14 @@ class LoanViewSet(generics.ListCreateAPIView):
             return Response({'message': f'the number of installments needs to be at least {min_installments}'})
         
         else:
+            
+            # registering the loan
             loan_serializer = serializers.LoanSerializer(
                 data={
                     "value":value,
                     "installments":installments,
                     "account": account,
-                    "fees":  decimal.Decimal(0.05),
+                    # "fees":  decimal.Decimal(0.05),
                     # "request_date":request_date,
                     # "status": status
                 }
@@ -193,11 +197,28 @@ class LoanViewSet(generics.ListCreateAPIView):
             loan_serializer.is_valid(raise_exception=True)
             loan_serializer.save()
 
-            # for payment in installments:
-            #     # models.LoanInstallments(
-            #     #     value= payment.value,
-            #     # )
-            #     print(payment.value)
+            last_loan = models.Loan.objects.latest('id')
+
+            # creating installments
+            for i in range(installments):
+                installment_serializer = serializers.LoanInstallmentsSerializer(
+                    data={
+                        
+                        # value = initial_value / installmenst + fees:
+                        "value": round( (value / installments * last_loan.fees) ,2) ,
+                        
+                        # on each iteration +1 month
+                        "due_date": datetime.datetime.combine(datetime.date.today() + datetime.timedelta(i), datetime.datetime.min.time()),
+
+                        "loanId": last_loan.pk,
+
+                        "payed_date": None
+
+                    }
+                )
+
+                installment_serializer.is_valid(raise_exception=True)
+                installment_serializer.save()
 
 
             return Response({'message': 'Loan Recieved'}, status=status.HTTP_201_CREATED)
