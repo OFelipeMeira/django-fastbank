@@ -2,18 +2,23 @@ from rest_framework import serializers
 from core.models import *
 from user.serializers import UserSerializer
 
-class AccountSerialzer(serializers.ModelSerializer):
+class AccountSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Account
+        fields = ['id','agency', 'number']
+        read_only_fields = ['number']
+
+class AccountUserSerializer(serializers.ModelSerializer):
     user = UserSerializer()
     class Meta:
         model = Account
         fields = ['id','agency', 'number',"user"]
         read_only_fields = ['number']
 
-
-class AccountDetailSerializer(AccountSerialzer):
-    class Meta(AccountSerialzer.Meta):
-        fields = AccountSerialzer.Meta.fields + ['id', 'balance', 'created_at']
-        read_only_fields = AccountSerialzer.Meta.fields + ['id', 'balance', 'created_at']
+class AccountDetailSerializer(AccountSerializer):
+    class Meta(AccountSerializer.Meta):
+        fields = AccountSerializer.Meta.fields + ['id', 'balance', 'created_at']
+        read_only_fields = AccountSerializer.Meta.fields + ['id', 'balance', 'created_at']
 
 
 class ValueSerialzier(serializers.Serializer):
@@ -22,9 +27,24 @@ class ValueSerialzier(serializers.Serializer):
     class Meta:
         fields = ['value']
 
+class TransferDetailSerializer(serializers.ModelSerializer):
+    sender = AccountUserSerializer()
+    receiver = AccountUserSerializer()
+    value = serializers.DecimalField(max_digits=8, decimal_places=2)
+
+    class Meta:
+        model = Transfer
+        fields = ['value', "sender", "receiver","description"]
+
 class TransferSerializer(serializers.ModelSerializer):
-    sender = AccountSerialzer()
-    receiver = AccountSerialzer()
+    sender = serializers.PrimaryKeyRelatedField(
+        queryset = Account.objects.all(),
+        many=False
+    )
+    receiver = serializers.PrimaryKeyRelatedField(
+        queryset = Account.objects.all(),
+        many=False
+    )
     value = serializers.DecimalField(max_digits=8, decimal_places=2)
 
     class Meta:

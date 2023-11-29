@@ -71,7 +71,7 @@ class Transfer(models.Model):
     sender = models.ForeignKey(Account, on_delete=models.PROTECT, related_name="sender")
     receiver = models.ForeignKey(Account, on_delete=models.PROTECT, related_name="receiver")
     value = models.DecimalField(max_digits=10,decimal_places=2)
-    description = models.CharField(max_length=255, null=True)
+    description = models.CharField(max_length=255, null=True, blank=True)
 
 class Loan(models.Model):
     account = models.ForeignKey(Account, on_delete=models.PROTECT)

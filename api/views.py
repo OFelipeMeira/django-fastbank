@@ -24,7 +24,7 @@ class AccountViewSet(viewsets.ModelViewSet):
     def get_serializer_class(self):
         if self.action == 'retrieve' or self.action == 'create':
             return serializers.AccountDetailSerializer
-        return serializers.AccountSerialzer
+        return serializers.AccountSerializer
     
     def create(self, request, *args, **kwargs):
         serializer = serializers.AccountDetailSerializer(data=request.data)
@@ -84,7 +84,12 @@ class AccountViewSet(viewsets.ModelViewSet):
 
 class TansferViewSet(viewsets.GenericViewSet):
     queryset = models.Transfer.objects.all()
-    serializer_class = serializers.TransferSerializer
+    # serializer_class = serializers.TransferSerializer
+
+    def get_serializer_class(self):
+        if self.action == 'retrieve' or self.action == 'create':
+            return serializers.TransferDetailSerializer
+        return serializers.TransferSerializer
 
     def get_user(self):
         return self.request.user
@@ -102,6 +107,10 @@ class TansferViewSet(viewsets.GenericViewSet):
         
         print("+"*30)
         print(round(value,2))
+        print(sender)
+        print(receiver)
+        print(value)
+        print(description)
         
         if value < 0:
             # If trys to transfer <=0
