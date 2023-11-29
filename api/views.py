@@ -165,13 +165,6 @@ class LoanViewSet(generics.ListCreateAPIView):
         value = decimal.Decimal(request.data.get("value"))
         installments = request.data.get("installments")
 
-                
-        print("+"*30)
-        print(round(value,2))
-        print(account)
-        print(value)
-        print(installments)
-
         min_value = 1000
         min_installments = 1
         
@@ -189,9 +182,6 @@ class LoanViewSet(generics.ListCreateAPIView):
                     "value":value,
                     "installments":installments,
                     "account": account,
-                    # "fees":  decimal.Decimal(0.05),
-                    # "request_date":request_date,
-                    # "status": status
                 }
             )
             loan_serializer.is_valid(raise_exception=True)
@@ -208,7 +198,7 @@ class LoanViewSet(generics.ListCreateAPIView):
                         "value": round( (value / installments * last_loan.fees) ,2) ,
                         
                         # on each iteration +1 month
-                        "due_date": datetime.datetime.combine(datetime.date.today() + datetime.timedelta(i), datetime.datetime.min.time()),
+                        "due_date": datetime.datetime.combine(datetime.date.today() +  relativedelta(months=+i), datetime.datetime.min.time()),
 
                         "loanId": last_loan.pk,
 
@@ -220,5 +210,56 @@ class LoanViewSet(generics.ListCreateAPIView):
                 installment_serializer.is_valid(raise_exception=True)
                 installment_serializer.save()
 
+            user = models.Account.objects.get( id=account )
+            user.balance += value
+            user.save()
 
             return Response({'message': 'Loan Recieved'}, status=status.HTTP_201_CREATED)
+
+class CreditViewSet(generics.ListCreateAPIView):
+    queryset = models.Credit.objects.all()
+    serializer_class = serializers.CreditSerializer
+    authentication_classes = [authenticationJWT.JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def create(self, request):
+        account = request.data.get("account")
+        value = decimal.Decimal(request.data.get("value"))
+        installments = request.data.get("installments")
+
+        print("account")
+        print(account)
+        print("value")
+        print(value)
+        print("16312")
+        print(installments)
+
+        credit_serializer = serializers.CreditSerializer(
+            data={
+                "account": account,
+                "installments": installments,
+                "value": value
+            }
+        )
+        credit_serializer.is_valid(raise_exception=True)
+        credit_serializer.save()
+
+        last_credit = models.Credit.objects.latest("id")
+
+        for i in range(installments):
+
+            # today + x monthes with fixed day(5)
+            due_date = datetime.datetime.now() + relativedelta(months=+i)
+            due_date = datetime.datetime.combine( due_date , datetime.datetime.min.time())
+
+            installments_serializer = serializers.CreditInstallmentsSerializer(
+                data={
+                    "creditId": last_credit.pk,
+                    "value": round( (value/installments) , 2),
+                    "due_date": due_date.replace(day=5)
+                }
+            )
+
+            installments_serializer.is_valid(raise_exception=True)
+            installments_serializer.save()
+        return Response({'message': 'Credit Buy done'}, status=status.HTTP_201_CREATED)

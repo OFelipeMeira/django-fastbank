@@ -78,15 +78,24 @@ class Loan(models.Model):
     installments = models.IntegerField()
     request_date = models.DateTimeField(default=timezone.now)
     payed = models.BooleanField(default=False)
-
-    # original value
-    value = models.DecimalField(max_digits=10, decimal_places=2)
-    # % of fees
-    fees = models.DecimalField(max_digits=5,decimal_places=3, default=1.025)
+    value = models.DecimalField(max_digits=10, decimal_places=2) # original value
+    fees = models.DecimalField(max_digits=5,decimal_places=3, default=1.025) # % of fees
 
 class LoanInstallments(models.Model):
     loanId = models.ForeignKey(Loan, on_delete=models.CASCADE)
     payed_date = models.DateTimeField(null=True)
     due_date = models.DateTimeField(null=False)
-    # value with fee added
+    value = models.DecimalField(max_digits=10,decimal_places=2) # value with fee added
+
+class Credit(models.Model):
+    account = models.ForeignKey(Account, on_delete=models.PROTECT)
+    installments = models.IntegerField()
+    value = models.DecimalField(max_digits=10, decimal_places=2)
+    date = models.DateTimeField(default=timezone.now)
+    payed = models.BooleanField(default=False)
+
+class CreditInstallments(models.Model):
+    creditId = models.ForeignKey(Credit, on_delete=models.PROTECT)
+    payed_date = models.DateTimeField(null=True)
+    due_date = models.DateTimeField(null=False)
     value = models.DecimalField(max_digits=10,decimal_places=2)

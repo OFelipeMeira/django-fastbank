@@ -60,3 +60,13 @@ class LoanInstallmentsSerializer(serializers.ModelSerializer):
     class Meta:
         model = LoanInstallments
         fields = '__all__'
+
+class CreditSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Credit
+        fields =  ['account','installments','value']
+
+class CreditInstallmentsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CreditInstallments
+        fields = '__all__'

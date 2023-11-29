@@ -1,10 +1,11 @@
 from dateutil.relativedelta import relativedelta
-from datetime import date
+import datetime
 
 if __name__ == "__main__":
-    value = 5000
-    fees = 1.025
-    install = 3
 
-    a = round( (value/install * fees) ,2) 
-    print( a )
+
+    for i in range(5):
+        due_date = datetime.datetime.now() + relativedelta(months=+i)
+        due_date = datetime.datetime.combine( due_date , datetime.datetime.min.time())
+
+        print(due_date.replace(day=5))
