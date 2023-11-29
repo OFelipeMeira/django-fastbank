@@ -5,19 +5,19 @@ from user.serializers import UserSerializer
 class AccountSerializer(serializers.ModelSerializer):
     class Meta:
         model = Account
-        fields = ['id','agency', 'number']
+        fields = ['id','agency', 'number','nickname']
         read_only_fields = ['number']
 
 class AccountUserSerializer(serializers.ModelSerializer):
     user = UserSerializer()
     class Meta:
         model = Account
-        fields = ['id','agency', 'number',"user"]
+        fields = ['id','agency', 'number',"user",'nickname']
         read_only_fields = ['number']
 
 class AccountDetailSerializer(AccountSerializer):
     class Meta(AccountSerializer.Meta):
-        fields = AccountSerializer.Meta.fields + ['id', 'balance', 'created_at']
+        fields = AccountSerializer.Meta.fields + ['id', 'balance', 'created_at', 'nickname']
         read_only_fields = AccountSerializer.Meta.fields + ['id', 'balance', 'created_at']
 
 

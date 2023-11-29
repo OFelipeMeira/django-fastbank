@@ -78,12 +78,7 @@
                 "type": "formdata",
                 "raw": "",
                 "form": [],
-                "files": [
-                    {
-                        "name": "url_imagem",
-                        "value": "c:\\Users\\44923534885\\Downloads\\iconSettings.png"
-                    }
-                ]
+                "files": []
             },
             "tests": []
         },
@@ -137,12 +132,7 @@
                 "type": "formdata",
                 "raw": "",
                 "form": [],
-                "files": [
-                    {
-                        "name": "url_imagem",
-                        "value": "c:\\Users\\44923534885\\Downloads\\iconSettings.png"
-                    }
-                ]
+                "files": []
             },
             "tests": []
         },

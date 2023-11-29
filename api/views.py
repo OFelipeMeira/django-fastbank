@@ -32,6 +32,7 @@ class AccountViewSet(viewsets.ModelViewSet):
         
         if serializer.is_valid():
             account_number = ""
+            nickname = request.data['nickname']
 
             for _ in range(16):
                 account_number += f"{ random.randint(0,9) }"
@@ -40,6 +41,7 @@ class AccountViewSet(viewsets.ModelViewSet):
                 user= self.request.user,
                 number= account_number,
                 agency= "0001",
+                nickname= nickname
             )
 
             account.balance = decimal.Decimal(0)

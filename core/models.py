@@ -59,7 +59,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 class Account(models.Model):
     agency = models.CharField(max_length=4)
     number = models.CharField(max_length=16)
-    # nickname = models.CharField(max_length=255)
+    nickname = models.CharField(max_length=255)
     user = models.ForeignKey( settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
     balance = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     created_at = models.DateTimeField(default=timezone.now)
