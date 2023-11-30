@@ -9,6 +9,8 @@ from django.contrib.auth.models import(
     BaseUserManager,
     PermissionsMixin
 )
+from random import randint
+import datetime
 
 def user_image_field(instance, filename):
     ext = os.path.splitext(filename)[1]
@@ -73,6 +75,19 @@ class Transfer(models.Model):
     value = models.DecimalField(max_digits=10,decimal_places=2)
     description = models.CharField(max_length=255, null=True, blank=True)
 
+class Card(models.Model):
+    account = models.ForeignKey(Account, on_delete=models.PROTECT)
+    number = models.CharField(max_length=12)
+    cvv = models.CharField(max_length=3)
+    expiration_date = models.DateTimeField()
+
+    def save(self, *args, **kwargs):
+        self.number = f"{randint(1000,9999)} {randint(1000,9999)} {randint(1000,9999)} {randint(1000,9999)}"
+        self.cvv = f"{randint(100,999)}"
+        self.expiration_date = timezone.now() + timezone.timedelta(days=3650)
+
+        super(Card, self).save(*args, **kwargs)
+
 class Loan(models.Model):
     account = models.ForeignKey(Account, on_delete=models.PROTECT)
     installments = models.IntegerField()
@@ -88,13 +103,14 @@ class LoanInstallments(models.Model):
     value = models.DecimalField(max_digits=10,decimal_places=2) # value with fee added
 
 class Credit(models.Model):
-    account = models.ForeignKey(Account, on_delete=models.PROTECT)
+    card = models.ForeignKey(Card, on_delete=models.PROTECT)
     installments = models.IntegerField()
     value = models.DecimalField(max_digits=10, decimal_places=2)
     date = models.DateTimeField(default=timezone.now)
     payed = models.BooleanField(default=False)
 
 class CreditInstallments(models.Model):
+    # creditId = models.ForeignKey(Credit, on_delete=models.PROTECT, related_name='related_installment')
     creditId = models.ForeignKey(Credit, on_delete=models.PROTECT)
     payed_date = models.DateTimeField(null=True)
     due_date = models.DateTimeField(null=False)

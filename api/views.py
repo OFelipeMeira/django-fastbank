@@ -31,8 +31,12 @@ class AccountViewSet(viewsets.ModelViewSet):
         serializer = serializers.AccountDetailSerializer(data=request.data)
         
         if serializer.is_valid():
+            try:
+                nickname = request.data['nickname']
+            except:
+                return Response({"error": "no nickname"}, status=status.HTTP_400_BAD_REQUEST)
+            
             account_number = ""
-            nickname = request.data['nickname']
 
             for _ in range(16):
                 account_number += f"{ random.randint(0,9) }"
@@ -229,13 +233,6 @@ class CreditViewSet(generics.ListCreateAPIView):
         value = decimal.Decimal(request.data.get("value"))
         installments = request.data.get("installments")
 
-        print("account")
-        print(account)
-        print("value")
-        print(value)
-        print("16312")
-        print(installments)
-
         credit_serializer = serializers.CreditSerializer(
             data={
                 "account": account,
@@ -265,3 +262,23 @@ class CreditViewSet(generics.ListCreateAPIView):
             installments_serializer.is_valid(raise_exception=True)
             installments_serializer.save()
         return Response({'message': 'Credit Buy done'}, status=status.HTTP_201_CREATED)
+    
+
+    # def list(self, request, pk=None):
+    #     print("pk")
+    #     print(pk)
+    #     print("="*30)
+    #     queryset = models.Credit.objects.filter(account=pk)
+
+    #     serializer = serializers.CreditReadSerializer(queryset, many=True)
+
+    #     return Response(serializer.data)
+
+class CardViewSet(generics.CreateAPIView, generics.RetrieveAPIView):
+    serializer_class = serializers.CardSerializer
+    authentication_classes = [authenticationJWT.JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    
+    def get_object(self):
+        """Retrieve and return a user."""
+        return self.request.user

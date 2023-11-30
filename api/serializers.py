@@ -64,9 +64,25 @@ class LoanInstallmentsSerializer(serializers.ModelSerializer):
 class CreditSerializer(serializers.ModelSerializer):
     class Meta:
         model = Credit
-        fields =  ['account','installments','value']
+        fields =  ['card','installments','value']
+
+class CardSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Card
+        fields = '__all__'
+        read_only_fields = ['number','cvv', 'expiration_date']
 
 class CreditInstallmentsSerializer(serializers.ModelSerializer):
     class Meta:
         model = CreditInstallments
-        fields = '__all__'
+        fields = ['creditId',
+                    'payed_date',
+                    "due_date",
+                    'value']
+
+# class CreditReadSerializer(serializers.ModelSerializer):
+#     # related_installment = CreditInstallmentsSerializer()
+#     related_installment = CreditInstallmentsSerializer(instance='related_installment')
+#     class Meta:
+#         model = Credit
+#         fields =  ['account', 'installments', 'value', 'related_installment']

@@ -11,5 +11,7 @@ app_name = 'api'
 urlpatterns = [
     path('', include(router.urls)),
     path('loan/',views.LoanViewSet.as_view()),
-    path('credit/',views.CreditViewSet.as_view())
+    path('credit/',views.CreditViewSet.as_view()),
+    path('credit/<int:pk>',views.CreditViewSet.as_view()),
+    path('card/', views.CardViewSet.as_view())
 ]
