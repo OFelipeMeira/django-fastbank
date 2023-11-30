@@ -79,12 +79,12 @@ class Card(models.Model):
     account = models.ForeignKey(Account, on_delete=models.PROTECT)
     number = models.CharField(max_length=12)
     cvv = models.CharField(max_length=3)
-    expiration_date = models.DateTimeField()
+    expiration_date = models.DateField()
 
     def save(self, *args, **kwargs):
         self.number = f"{randint(1000,9999)} {randint(1000,9999)} {randint(1000,9999)} {randint(1000,9999)}"
         self.cvv = f"{randint(100,999)}"
-        self.expiration_date = timezone.now() + timezone.timedelta(days=3650)
+        self.expiration_date = timezone.localdate() + timezone.timedelta(days=3650)
 
         super(Card, self).save(*args, **kwargs)
 
