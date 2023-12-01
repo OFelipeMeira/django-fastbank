@@ -45,12 +45,12 @@ class LoginAttemptsMiddleware:
             if email:
                 user = User.objects.get(email=email)
 
-                # # if user was created less than 3 minutes ago
-                # if timezone.now() <= (user.created_at + timezone.timedelta(minutes=3)):
-                #     return JsonResponse(
-                #     {'detail': 'Your account is in analysis. Try again later'},
-                #     status=status.HTTP_401_UNAUTHORIZED
-                # )    
+                # if user was created less than 3 minutes ago
+                if timezone.now() <= (user.created_at + timezone.timedelta(minutes=3)):
+                    return JsonResponse(
+                    {'detail': 'Your account is in analysis. Try again later'},
+                    status=status.HTTP_401_UNAUTHORIZED
+                )    
 
                 # if login is wrong:
                 if user and response.status_code == status.HTTP_401_UNAUTHORIZED:

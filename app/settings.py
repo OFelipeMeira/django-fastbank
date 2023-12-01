@@ -44,7 +44,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'drf_spectacular',
     'corsheaders',
-    
+    'cpf_field',
+
     'core',
     'user',
     'api',

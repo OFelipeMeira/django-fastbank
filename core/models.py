@@ -11,6 +11,7 @@ from django.contrib.auth.models import(
 )
 from random import randint
 import datetime
+from cpf_field import models as modelCPF
 
 def user_image_field(instance, filename):
     ext = os.path.splitext(filename)[1]
@@ -40,7 +41,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(max_length=255, unique=True)
     first_name = models.CharField(max_length=255, null=False)
     last_name = models.CharField(max_length=255, null=False)
-    cpf = models.CharField(max_length=255, null=False)
+    cpf = modelCPF.CPFField('cpf')
     url_image = models.ImageField(null=True, upload_to=user_image_field)
 
     is_active = models.BooleanField(default=True)
@@ -70,10 +71,11 @@ class Account(models.Model):
         return f"{self.agency} {self.number}"
     
 class Transfer(models.Model):
-    sender = models.ForeignKey(Account, on_delete=models.PROTECT, related_name="sender")
-    receiver = models.ForeignKey(Account, on_delete=models.PROTECT, related_name="receiver")
+    sender = models.ForeignKey(Account, on_delete=models.PROTECT, related_name="sender", null=True)
+    receiver = models.ForeignKey(Account, on_delete=models.PROTECT, related_name="receiver", null=True)
     value = models.DecimalField(max_digits=10,decimal_places=2)
     description = models.CharField(max_length=255, null=True, blank=True)
+    created_at = models.DateTimeField(default=timezone.now)
 
 # class Card(models.Model):
 #     account = models.ForeignKey(Account, on_delete=models.PROTECT)

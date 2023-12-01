@@ -36,6 +36,15 @@ class TransferDetailSerializer(serializers.ModelSerializer):
         model = Transfer
         fields = ['value', "sender", "receiver","description"]
 
+class CreateTransferDetailSerializer(serializers.ModelSerializer):
+    # sender = AccountUserSerializer()
+    # receiver = AccountUserSerializer()
+    value = serializers.DecimalField(max_digits=8, decimal_places=2)
+
+    class Meta:
+        model = Transfer
+        fields = ['value', "sender", "receiver","description"]
+
 class TransferSerializer(serializers.ModelSerializer):
     sender = serializers.PrimaryKeyRelatedField(
         queryset = Account.objects.all(),

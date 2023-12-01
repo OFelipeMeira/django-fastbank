@@ -69,6 +69,8 @@ class AccountViewSet(viewsets.ModelViewSet):
                 account.balance = 0 if balance - withdraw_value <= 0 else balance - withdraw_value
                 account.save()
 
+                self.save_in_tranfer(account.id, None, withdraw_value)
+
                 return Response({"balance": account.balance}, status=status.HTTP_200_OK)
             
             return Response({'message': 'Insufficient balance'}, status=status.HTTP_401_UNAUTHORIZED)
@@ -84,9 +86,23 @@ class AccountViewSet(viewsets.ModelViewSet):
             account.balance += decimal.Decimal(serializer.validated_data.get('value'))
             account.save()
 
+            self.save_in_tranfer(None, account.id, serializer.validated_data.get('value'))
+
             return Response({'balance':account.balance}, status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def save_in_tranfer(self, sender, receiver, value):
+        transfer_serializer = serializers.CreateTransferDetailSerializer(
+            data={
+                "sender": sender,
+                "receiver": receiver,
+                "value": value,
+                "description": ""
+            }
+        )
+        transfer_serializer.is_valid(raise_exception=True)
+        transfer_serializer.save()
     
 
 class TansferViewSet(viewsets.GenericViewSet):
@@ -154,7 +170,7 @@ class TansferViewSet(viewsets.GenericViewSet):
     def statement(self, request, pk=None):
         queryset = models.Transfer.objects.filter(
             Q(sender=pk) | Q(receiver=pk)
-        )
+        ).order_by('-created_at')
         serializer = self.get_serializer(queryset, many=True)
 
         return Response(serializer.data)
@@ -275,9 +291,6 @@ class CreditViewSet(generics.ListCreateAPIView):
     
 
     def list(self, request, pk=None):
-        print("pk")
-        print(pk)
-        print("="*30)
         queryset = models.Credit.objects.filter(account=pk)
 
         serializer = serializers.CreditSerializer(queryset, many=True)
