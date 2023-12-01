@@ -45,6 +45,13 @@ class LoginAttemptsMiddleware:
             if email:
                 user = User.objects.get(email=email)
 
+                # # if user was created less than 3 minutes ago
+                # if timezone.now() <= (user.created_at + timezone.timedelta(minutes=3)):
+                #     return JsonResponse(
+                #     {'detail': 'Your account is in analysis. Try again later'},
+                #     status=status.HTTP_401_UNAUTHORIZED
+                # )    
+
                 # if login is wrong:
                 if user and response.status_code == status.HTTP_401_UNAUTHORIZED:
                     user.login_attempts += 1
@@ -72,4 +79,5 @@ class LoginAttemptsMiddleware:
                             {'detail': 'Your account has been blocked. Try again later'},
                             status=status.HTTP_418_IM_A_TEAPOT
                         )
+        
         return response

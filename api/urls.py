@@ -13,5 +13,5 @@ urlpatterns = [
     path('loan/',views.LoanViewSet.as_view()),
     path('credit/',views.CreditViewSet.as_view()),
     path('credit/<int:pk>',views.CreditViewSet.as_view()),
-    path('card/', views.CardViewSet.as_view())
+    # path('card/', views.CardViewSet.as_view())
 ]

@@ -201,7 +201,7 @@ class LoanViewSet(generics.ListCreateAPIView):
                     data={
                         
                         # value = initial_value / installmenst + fees:
-                        "value": round( (value / installments * last_loan.fees) ,2) ,
+                        "value": round( (value / installments * (last_loan.fees * i ) ) ,2) ,
                         
                         # on each iteration +1 month
                         "due_date": datetime.datetime.combine(datetime.date.today() +  relativedelta(months=+i), datetime.datetime.min.time()),
@@ -233,52 +233,53 @@ class CreditViewSet(generics.ListCreateAPIView):
         value = decimal.Decimal(request.data.get("value"))
         installments = request.data.get("installments")
 
-        credit_serializer = serializers.CreditSerializer(
-            data={
-                "account": account,
-                "installments": installments,
-                "value": value
-            }
-        )
-        credit_serializer.is_valid(raise_exception=True)
-        credit_serializer.save()
+        max_value = 1000
+        min_installments = 1
 
-        last_credit = models.Credit.objects.latest("id")
-
-        for i in range(installments):
-
-            # today + x monthes with fixed day(5)
-            due_date = datetime.datetime.now() + relativedelta(months=+i)
-            due_date = datetime.datetime.combine( due_date , datetime.datetime.min.time())
-
-            installments_serializer = serializers.CreditInstallmentsSerializer(
+        if value > max_value:
+            return Response({'message': f'the value needs to be less than {max_value}'})
+        
+        elif installments <= min_installments:
+            return Response({'message': f'the number of installments needs to be at least {min_installments}'})
+        
+        else:
+            credit_serializer = serializers.CreditSerializer(
                 data={
-                    "creditId": last_credit.pk,
-                    "value": round( (value/installments) , 2),
-                    "due_date": due_date.replace(day=5)
+                    "account": account,
+                    "installments": installments,
+                    "value": value
                 }
             )
+            credit_serializer.is_valid(raise_exception=True)
+            credit_serializer.save()
 
-            installments_serializer.is_valid(raise_exception=True)
-            installments_serializer.save()
-        return Response({'message': 'Credit Buy done'}, status=status.HTTP_201_CREATED)
+            last_credit = models.Credit.objects.latest("id")
+
+            for i in range(installments):
+
+                # today + x monthes with fixed day(5)
+                due_date = datetime.datetime.now() + relativedelta(months=+i)
+                due_date = datetime.datetime.combine( due_date , datetime.datetime.min.time())
+
+                installments_serializer = serializers.CreditInstallmentsSerializer(
+                    data={
+                        "creditId": last_credit.pk,
+                        "value": round( (value/installments) , 2),
+                        "due_date": due_date.replace(day=5)
+                    }
+                )
+
+                installments_serializer.is_valid(raise_exception=True)
+                installments_serializer.save()
+            return Response({'message': 'Credit Buy done'}, status=status.HTTP_201_CREATED)
     
 
-    # def list(self, request, pk=None):
-    #     print("pk")
-    #     print(pk)
-    #     print("="*30)
-    #     queryset = models.Credit.objects.filter(account=pk)
+    def list(self, request, pk=None):
+        print("pk")
+        print(pk)
+        print("="*30)
+        queryset = models.Credit.objects.filter(account=pk)
 
-    #     serializer = serializers.CreditReadSerializer(queryset, many=True)
+        serializer = serializers.CreditSerializer(queryset, many=True)
 
-    #     return Response(serializer.data)
-
-class CardViewSet(generics.CreateAPIView, generics.RetrieveAPIView):
-    serializer_class = serializers.CardSerializer
-    authentication_classes = [authenticationJWT.JWTAuthentication]
-    permission_classes = [IsAuthenticated]
-    
-    def get_object(self):
-        """Retrieve and return a user."""
-        return self.request.user
+        return Response(serializer.data)
