@@ -1,70 +1,97 @@
-# file to verify and convert models into json format
-import random
-
 from rest_framework import serializers
-
-from .models import (
-    User,
-    Address,
-    Account,
-    Card,
-    Transactions
-)
-
-class UserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = (
-            'id',
-            'name',
-            'cpf',
-            'photo'
-        )
-        
-
-class AddressSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Address
-        fields = (
-            'id',
-            'user',
-            'address',
-            'city',
-            'state',
-            'complement',
-            'cep'
-        )
+from core.models import *
+from user.serializers import UserSerializer
 
 class AccountSerializer(serializers.ModelSerializer):
     class Meta:
         model = Account
-        fields = (
-            'id',
-            'user',
-            'password',
-            'account_number',
-            'created_at',
-        )
-        
-class CardSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Card
-        fields = (
-            'id',
-            'account',
-            'number',
-            'cvv',
-            'created_at',
-            'expiration_date',
-        )
+        fields = ['id','agency', 'number','nickname']
+        read_only_fields = ['number']
 
-class TransactionsSerializer(serializers.ModelSerializer):
+class AccountUserSerializer(serializers.ModelSerializer):
+    user = UserSerializer()
     class Meta:
-        model = Transactions
-        fields = (
-            'id',
-            'sender',
-            'receiver',
-            'value',
-            'description',
-        )
+        model = Account
+        fields = ['id','agency', 'number',"user",'nickname']
+        read_only_fields = ['number']
+
+class AccountDetailSerializer(AccountSerializer):
+    class Meta(AccountSerializer.Meta):
+        fields = AccountSerializer.Meta.fields + ['id', 'balance', 'created_at', 'nickname']
+        read_only_fields = AccountSerializer.Meta.fields + ['id', 'balance', 'created_at']
+
+
+class ValueSerialzier(serializers.Serializer):
+    value = serializers.DecimalField(max_digits=8, decimal_places=2)
+
+    class Meta:
+        fields = ['value']
+
+class TransferDetailSerializer(serializers.ModelSerializer):
+    sender = AccountUserSerializer()
+    receiver = AccountUserSerializer()
+    value = serializers.DecimalField(max_digits=8, decimal_places=2)
+
+    class Meta:
+        model = Transfer
+        fields = ['value', "sender", "receiver","description"]
+
+class CreateTransferDetailSerializer(serializers.ModelSerializer):
+    # sender = AccountUserSerializer()
+    # receiver = AccountUserSerializer()
+    value = serializers.DecimalField(max_digits=8, decimal_places=2)
+
+    class Meta:
+        model = Transfer
+        fields = ['value', "sender", "receiver","description"]
+
+class TransferSerializer(serializers.ModelSerializer):
+    sender = serializers.PrimaryKeyRelatedField(
+        queryset = Account.objects.all(),
+        many=False
+    )
+    receiver = serializers.PrimaryKeyRelatedField(
+        queryset = Account.objects.all(),
+        many=False
+    )
+    value = serializers.DecimalField(max_digits=8, decimal_places=2)
+
+    class Meta:
+        model = Transfer
+        fields = ['value', "sender", "receiver","description"]
+
+class LoanSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Loan
+        fields = ['account','installments','value']
+
+class LoanInstallmentsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LoanInstallments
+        fields = '__all__'
+
+class CreditSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Credit
+        fields =  ['account','installments','value']
+
+# class CardSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Card
+#         fields = '__all__'
+#         read_only_fields = ['number','cvv', 'expiration_date']
+
+class CreditInstallmentsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CreditInstallments
+        fields = ['creditId',
+                    'payed_date',
+                    "due_date",
+                    'value']
+
+# class CreditReadSerializer(serializers.ModelSerializer):
+#     # related_installment = CreditInstallmentsSerializer()
+#     related_installment = CreditInstallmentsSerializer(instance='related_installment')
+#     class Meta:
+#         model = Credit
+#         fields =  ['account', 'installments', 'value', 'related_installment']

@@ -1,23 +1,17 @@
-"""
-    API Endpoints
-"""
+from django.urls import path, include
+from api import views
+from rest_framework.routers import DefaultRouter
 
-from django.urls import path
-from rest_framework.routers import SimpleRouter
+router = DefaultRouter()
+router.register('accounts', views.AccountViewSet)
+router.register('transfer', views.TansferViewSet)
 
-from .views import (
-    UserViewSet,
-    AccountViewSet,
-    AddressViewSet,
-    CardViewSet,
-    TransactionsViewSet,
-)
+app_name = 'api'
 
-router = SimpleRouter()
-router.register('users', UserViewSet)
-router.register('accounts', AccountViewSet)
-router.register('address', AddressViewSet)
-router.register('cards', CardViewSet)
-router.register('transactions', TransactionsViewSet)
-
-urlspatterns = router.urls
+urlpatterns = [
+    path('', include(router.urls)),
+    path('loan/',views.LoanViewSet.as_view()),
+    path('credit/',views.CreditViewSet.as_view()),
+    path('credit/<int:pk>',views.CreditViewSet.as_view()),
+    # path('card/', views.CardViewSet.as_view())
+]

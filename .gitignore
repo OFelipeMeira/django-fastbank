@@ -1,3 +1,13 @@
-.venv/
+.venv/*
 
-__pycache__/
+*/__pycache__
+*/*/__pycache__
+*/*/*/__pycache
+
+.sqlite3
+.sqlite
+db.sqlite3
+
+*/.png
+*/.jpg
+*/.svg

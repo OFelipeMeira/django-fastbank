@@ -1,22 +1,11 @@
+from dateutil.relativedelta import relativedelta
+import datetime
 
-
-def test_api():
-    # http://127.0.0.1:8000/api/v1/users/1/
-    import requests
-    # r = requests.get('http://127.0.0.1:8000/api/v1/users/1/').json()
-    r = requests.get('http://127.0.0.1:8000/api/v1/users/').json()
-    # print(r["id"])
-    print(r)
-
-def test_account_number():
-    import random
-    a = ""
-    for i in range(4):
-        a += f"{random.randint(1000,9999)}"
-        a += "."
-
-    print(a)
-    
 if __name__ == "__main__":
-    a = 10000
-    print(str(a).zfill(4))
+
+
+    for i in range(5):
+        due_date = datetime.datetime.now() + relativedelta(months=+i)
+        due_date = datetime.datetime.combine( due_date , datetime.datetime.min.time())
+
+        print(due_date.replace(day=5))

@@ -1,2 +1,22 @@
+DB in sqlite3 : no user, no password
+
+admin = {
+    email: a@b.com
+    password: admin
+}
+
+user1 = {
+    first_name: Felipe
+    last_name: Meira
+    cpf: 123456
+    email: b@c.com
+    password: senai@mange
+}
 
 
+A fazer:
+    -solicitar cartão de credito
+    -historico de compras de cartão de credito
+
+    -solicitar emprestimo
+    -historico detalhes emprestimo
