@@ -108,6 +108,8 @@ class AccountViewSet(viewsets.ModelViewSet):
 class TansferViewSet(viewsets.GenericViewSet):
     queryset = models.Transfer.objects.all()
     # serializer_class = serializers.TransferSerializer
+    authentication_classes = [authenticationJWT.JWTAuthentication]
+    permission_classes = [IsAuthenticated]
 
     def get_serializer_class(self):
         if self.action == 'retrieve' or self.action == 'create':
@@ -140,6 +142,9 @@ class TansferViewSet(viewsets.GenericViewSet):
         else:
 
             # Verify if the 'sender' is an id from an Account from the logged user:
+            print(request.user)
+            print(request.user.id)
+            print(models.Account.objects.get(id=sender).user.id)
             if models.Account.objects.get(id=sender).user.id == request.user.id:
 
                 transfer_serializer = serializers.TransferSerializer(
@@ -190,10 +195,10 @@ class LoanViewSet(generics.ListCreateAPIView):
         min_value = 1000
         min_installments = 1
         
-        if value <= min_value:
+        if value < min_value:
             return Response({'message': f'the value to loan needs to be at least {min_value}'})
         
-        elif installments <= min_installments:
+        elif installments < min_installments:
             return Response({'message': f'the number of installments needs to be at least {min_installments}'})
         
         else:
