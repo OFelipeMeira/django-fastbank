@@ -183,17 +183,17 @@ class LoanViewSet(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated]
 
     def create(self, request):
-        account = request.data.get("account")
+        account = int(request.data.get("account"))
         value = decimal.Decimal(request.data.get("value"))
-        installments = request.data.get("installments")
+        installments = int(request.data.get("installments"))
 
         min_value = 1000
         min_installments = 1
         
-        if value <= min_value:
-            return Response({'message': f'the value to loan needs to be at least {min_value}'})
+        if value < min_value:
+            return Response({'message': f'the value to loan needs to be at least ${min_value}.00'})
         
-        elif installments <= min_installments:
+        elif installments < min_installments:
             return Response({'message': f'the number of installments needs to be at least {min_installments}'})
         
         else:
@@ -247,7 +247,7 @@ class CreditViewSet(generics.ListCreateAPIView):
     def create(self, request):
         account = request.data.get("account")
         value = decimal.Decimal(request.data.get("value"))
-        installments = request.data.get("installments")
+        installments = int(request.data.get("installments"))
 
         max_value = 1000
         min_installments = 1
